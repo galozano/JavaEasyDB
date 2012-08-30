@@ -1,6 +1,22 @@
 /**
- * 
- */
+   Copyright 2012 Gustavo Adolfo Lozano Velez
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+	JavaEasyDB is a light framework for small projects that want to connect 
+	to a database in a simple and straight way. 
+*/
+
 package easyDB.test;
 
 import static org.junit.Assert.*;
@@ -30,24 +46,47 @@ public class EasyDBTest
 	// Constants
 	//----------------------------------------------------------------------
 
+	/**
+	 * 
+	 */
 	public static final String URL = "jdbc:mysql://kelgal.com:3306/prueba";
 
+	/**
+	 * 
+	 */
 	public static final String USER = "afuera";
 
+	/**
+	 * 
+	 */
 	public static final String PASSWORD = "qazxsw23edc";
 
 	//----------------------------------------------------------------------
 	// Aributtes
 	//----------------------------------------------------------------------
 
+	/**
+	 * 
+	 */
 	private static EasyDB easy;
 
+	/**
+	 * 
+	 */
 	private static Connection conn;
 
 	//----------------------------------------------------------------------
 	// Private Methods
 	//----------------------------------------------------------------------
 
+	/**
+	 * 
+	 * @param host
+	 * @param username
+	 * @param password
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	private void connect(String host, String username, String password) throws ClassNotFoundException, SQLException
 	{
 		Class.forName( "com.mysql.jdbc.Driver" );
@@ -59,7 +98,8 @@ public class EasyDBTest
 	//----------------------------------------------------------------------
 
 	/**
-	 * @throws java.lang.Exception
+	 * 
+	 * @throws Exception
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception 
@@ -68,6 +108,7 @@ public class EasyDBTest
 	}
 
 	/**
+	 * 
 	 * @throws java.lang.Exception
 	 */
 	@AfterClass
@@ -77,6 +118,7 @@ public class EasyDBTest
 	}
 
 	/**
+	 * 
 	 * @throws java.lang.Exception
 	 */
 	@Before
@@ -103,6 +145,7 @@ public class EasyDBTest
 	}
 
 	/**
+	 * 
 	 * @throws java.lang.Exception
 	 */
 	@After
@@ -136,6 +179,9 @@ public class EasyDBTest
 	// Tests Methods
 	//----------------------------------------------------------------------
 
+	/**
+	 * 
+	 */
 	@Test
 	public void testSelect() 
 	{	
@@ -161,6 +207,9 @@ public class EasyDBTest
 		}	
 	}
 
+	/**
+	 * 
+	 */
 	@Test
 	public void testInsertValues( )
 	{
@@ -195,6 +244,9 @@ public class EasyDBTest
 		}
 	}
 
+	/**
+	 * 
+	 */
 	@Test
 	public void testIntert( )
 	{
@@ -231,6 +283,9 @@ public class EasyDBTest
 		}
 	}
 
+	/**
+	 * 
+	 */
 	@Test
 	public void testUpdateValues( )
 	{
@@ -266,6 +321,10 @@ public class EasyDBTest
 		}
 	}
 	
+	
+	/**
+	 * 
+	 */
 	@Test
 	public void testJOIN( )
 	{	
@@ -297,6 +356,9 @@ public class EasyDBTest
 		}	
 	}
 	
+	/**
+	 * 
+	 */
 	@Test
 	public void testExecuteSQL( )
 	{
@@ -322,6 +384,9 @@ public class EasyDBTest
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	@Test
 	public void testDeleteRow( )
 	{
@@ -351,6 +416,10 @@ public class EasyDBTest
 
 	}
 
+	/**
+	 * 
+	 * @throws SQLException
+	 */
 	@Test(expected=SQLException.class)
 	public void testDeleteTable( ) throws SQLException
 	{	

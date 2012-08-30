@@ -1,11 +1,3 @@
-package easyDB.mundo;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 /**
    Copyright 2012 Gustavo Adolfo Lozano Velez
 
@@ -23,9 +15,22 @@ import java.util.ArrayList;
 
 	JavaEasyDB is a light framework for small projects that want to connect 
 	to a database in a simple and straight way. 
+*/
+
+package easyDB.mundo;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+
+/**
 
    JavaEasyDB main class
- * @author Gustavo Adolfo Lozano Velez
+   @author Gustavo Adolfo Lozano Velez
  */
 public class EasyDB
 {
@@ -101,7 +106,7 @@ public class EasyDB
 
 	/**
 	 * SQL SELECT
-	 * @param columns columns to select ej. name,age
+	 * @param columns columns to select 
 	 */
 	public void Select(String columns)
 	{
@@ -112,7 +117,7 @@ public class EasyDB
 
 	/**
 	 * SQL FROM
-	 * @param table tables or tables ej. Users
+	 * @param table tables or tables
 	 */
 	public void From(String table)
 	{
@@ -462,7 +467,7 @@ public class EasyDB
 	} 
 
 	/**
-	 * 
+	 * Returns the current connection with the databse
 	 * @return
 	 */
 	public Connection getConnection( )
@@ -471,7 +476,7 @@ public class EasyDB
 	}
 
 	/**
-	 * 
+	 * Returns the string of the query being build
 	 * @return
 	 */
 	public String getQuery( )
