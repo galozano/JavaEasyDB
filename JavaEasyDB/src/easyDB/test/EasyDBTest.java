@@ -203,7 +203,7 @@ public class EasyDBTest
 			easy.addInt("id", 3);
 			easy.addString("name", "cami");
 			easy.addInt("age", 22);
-			easy.Insert("Users");		
+			easy.Insert("Users");
 
 			System.out.println("QUERY EXECUTED: " + easy.getQuery());
 
@@ -298,9 +298,57 @@ public class EasyDBTest
 	}
 	
 	@Test
+	public void testExecuteSQL( )
+	{
+		String sql = "SELECT name FROM prueba.Users WHERE age = ?";
+		String[] values = {"22"};
+		
+		try 
+		{
+			ResultSet result = easy.executeSQL(sql, values);
+			
+			if(result.next())
+			{
+				assertEquals(result.getString("name"), "Gus");
+			}
+			else
+			{
+				fail("There is no rows");
+			}		
+		}
+		catch (SQLException e)
+		{
+			fail(e.getMessage());
+		}
+	}
+	
+	@Test
 	public void testDeleteRow( )
 	{
+		try
+		{
+			String[ ] where = {"name=\"Gus\""};
+			
+			easy.DeleteRowValues("Users", where);
+			easy.execute();  
 		
+			String[] where2 = {"name=\"Gus\""};	
+			easy.Select("age");
+			easy.From("Users");
+			easy.Where(where2);
+			
+			ResultSet result = easy.executeQuery();
+			
+			if(result.next())
+			{
+				fail("The row exists");		
+			}	
+		} 
+		catch (SQLException e)
+		{
+			fail(e.getMessage());
+		}
+
 	}
 
 	@Test(expected=SQLException.class)
