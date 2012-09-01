@@ -37,11 +37,14 @@ public class EasyDB
 	//--------------------------------------------------------------
 	// Attributes
 	//--------------------------------------------------------------
-
-	/**
-	 * The query being build
-	 */
-	private StringBuilder query;
+	
+	private String select;
+	
+	private String from;
+	
+	private StringBuilder where;
+	
+	private String join;
 
 	/**
 	 * The values of the query
@@ -64,16 +67,20 @@ public class EasyDB
 
 	/**
 	 * Starting EasyDB using simple straight parameters
-	 * @param host 
-	 * @param database
-	 * @param username
-	 * @param password
+	 * @param host - database host
+	 * @param database - database schema
+	 * @param username - database username
+	 * @param password - databse password
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
 	public EasyDB(String host, String database,String username, String password) throws ClassNotFoundException, SQLException
-	{
-		this.query = new StringBuilder();	
+	{		
+		this.select = "";
+		this.from = "";
+		this.where = new StringBuilder();
+		this.join= "";
+					
 		this.values = new ArrayList<String>();
 
 		this.database = database;
@@ -110,9 +117,7 @@ public class EasyDB
 	 */
 	public void Select(String columns)
 	{
-		this.query.append("SELECT ");
-		this.query.append(columns);
-		this.query.append(" ");
+		this.select = "SELECT " + columns + " ";
 	}
 
 	/**
@@ -121,29 +126,48 @@ public class EasyDB
 	 */
 	public void From(String table)
 	{
-		this.query.append("FROM ");
-		this.query.append(this.database+ "." +table);
-		this.query.append(" ");
+		this.from = "FROM " + this.database+ "." +table + " ";
 	}
 
 	/**
 	 * SQL WHERE
 	 * @param where ej. {age=34,name=\"fred\"}
 	 */
-	public void Where(String[] where)
+	public void WhereValues(String[] where)
 	{
-		this.query.append("WHERE ");
+		this.where.append("WHERE ");
 
 		for (int i = 0; i < where.length ; i++) 
 		{
-			query.append(where[i]);
+			this.where.append(where[i]);
 
 			if(where.length != (i + 1))
 			{
-				query.append(" AND ");
+				this.where.append(" AND ");
 			}
 		}
 	}
+	
+	/**
+	 * 
+	 * @param where
+	 */
+	public void Where(String where)
+	{
+		if(this.where.toString().equals(""))
+		{
+			this.where.append("WHERE ");
+			this.where.append(where);
+		}
+		else
+		{
+			this.where.append(" AND ");
+			this.where.append(where);
+		}
+	}
+	
+	
+	
 
 	/**
 	 * SQL ORDER
@@ -151,8 +175,8 @@ public class EasyDB
 	 */
 	public void Order(String order)
 	{
-		this.query.append("ORDER BY ");
-		this.query.append(order);
+//		this.query.append("ORDER BY ");
+//		this.query.append(order);
 	}
 
 	/**
@@ -161,19 +185,22 @@ public class EasyDB
 	 */
 	public void GroupBy(String group)
 	{
-		this.query.append("GROUP BY ");
-		this.query.append(group);
+//		this.query.append("GROUP BY ");
+//		this.query.append(group);
 	}
 
 	/**
 	 * Comple Insert Statement
 	 * @param table
 	 * @param values 
+	 * @throws SQLException 
 	 */
-	public void InsertValues(String table, String[] values)
+	public void Insert(String table, String[] values) throws SQLException
 	{
-		this.query.append("INSERT INTO ");
-		this.query.append(this.database+ "." +table);
+		StringBuilder query = new StringBuilder();
+		
+		query.append("INSERT INTO ");
+		query.append(this.database+ "." +table);
 
 		StringBuilder sql1 = new StringBuilder();
 		StringBuilder sql2 = new StringBuilder();
@@ -199,20 +226,25 @@ public class EasyDB
 		sql1.append(" ) ");
 		sql2.append(" ) ");
 
-		this.query.append(sql1);
-		this.query.append("VALUES ");
-		this.query.append(sql2);
+		query.append(sql1);
+		query.append("VALUES ");
+		query.append(sql2);
+		
+		execute(query.toString());
 	}
 
 	/**
 	 * 
 	 * @param table
+	 * @throws SQLException 
 	 */
-	public void Insert(String table)
+	public void InsertValues(String table) throws SQLException
 	{
-		this.query.append("INSERT INTO ");
-		this.query.append(this.database+ "." +table);
+		StringBuilder query = new StringBuilder();
 
+		query.append("INSERT INTO ");
+		query.append(this.database+ "." +table);
+		
 		StringBuilder sql1 = new StringBuilder();
 		StringBuilder sql2 = new StringBuilder();
 
@@ -237,9 +269,12 @@ public class EasyDB
 		sql1.append(" ) ");
 		sql2.append(" ) ");
 
-		this.query.append(sql1);
-		this.query.append("VALUES ");
-		this.query.append(sql2);
+		
+		query.append(sql1);
+		query.append(" VALUES ");
+		query.append(sql2);
+		
+		execute(query.toString());
 	}
 
 	/**
@@ -247,11 +282,14 @@ public class EasyDB
 	 * @param table
 	 * @param values
 	 * @param where
+	 * @throws SQLException 
 	 */
-	public void UpdateValues(String table, String[] values, String[] where)
+	public void Update(String table, String[] values) throws SQLException
 	{
-		this.query.append("UPDATE ");
-		this.query.append(this.database + "." + table);
+		StringBuilder query = new StringBuilder();
+		
+		query.append("UPDATE ");
+		query.append(this.database + "." + table);
 
 		StringBuilder sql1 = new StringBuilder();
 		sql1.append(" SET ");
@@ -265,19 +303,25 @@ public class EasyDB
 		}
 
 		sql1.append(" ");
-		this.query.append(sql1);
-		this.Where(where);
+		query.append(sql1);
+		
+		query.append(where.toString());
+		
+		execute(query.toString());
 	}
 
 	/**
 	 * 
 	 * @param table
 	 * @param where
+	 * @throws SQLException 
 	 */
-	public void Update(String table, String[] where)
+	public void UpdateValues(String table) throws SQLException
 	{
-		this.query.append("UPDATE ");
-		this.query.append(table);
+		StringBuilder query = new StringBuilder();
+		
+		query.append("UPDATE ");
+		query.append(table);
 
 		StringBuilder sql1 = new StringBuilder();
 		StringBuilder sql2 = new StringBuilder();
@@ -303,33 +347,44 @@ public class EasyDB
 		sql1.append(") ");
 		sql2.append(") ");
 
-		this.query.append(sql1);
-		this.query.append("SET ");
-		this.query.append(sql2);
+		query.append(sql1);
+		query.append("SET ");
+		query.append(sql2);
+		
+		execute(query.toString());
 	}
 
 	/**
 	 * 
 	 * @param table
+	 * @throws SQLException 
 	 */
-	public void DeleteTable(String table)
+	public void DeleteTable(String table) throws SQLException
 	{
-		this.query.append("DROP TABLE ");
-		this.query.append(table);
+		StringBuilder query = new StringBuilder();
+		
+		query.append("DROP TABLE ");
+		query.append(table);
+		
+		execute(query.toString());
 	}
 
 	/**
 	 * 
 	 * @param table
 	 * @param values
+	 * @throws SQLException 
 	 */
-	public void DeleteRowValues(String table, String[] values)
+	public void DeleteRow(String table) throws SQLException
 	{
-		this.query.append("DELETE FROM ");
-		this.query.append(table);
-		this.query.append(" ");
+		StringBuilder query = new StringBuilder();
 		
-		this.Where(values);
+		query.append("DELETE FROM ");
+		query.append(table);
+		query.append(" ");
+		
+		query.append(this.where);
+		execute(query.toString());
 	}
 
 	/**
@@ -340,11 +395,7 @@ public class EasyDB
 	public void InnerJoin(String table, String on)
 	{
 		//INNER JOIN	
-		this.query.append("INNER JOIN ");
-		this.query.append(this.database + "." +table);
-
-		this.query.append(" ON ");
-		this.query.append(on);
+		join = "INNER JOIN " + this.database + "." + table + " ON " + on;
 	}
 
 	/**
@@ -384,13 +435,23 @@ public class EasyDB
 	 * 
 	 * @throws SQLException
 	 */
-	public void execute( ) throws SQLException
+	public void execute(String query) throws SQLException
 	{
-		PreparedStatement stmt = conn.prepareStatement(query.toString());		
+		System.out.println("QUERY EXECUTED: " + query);
+		
+		PreparedStatement stmt = conn.prepareStatement(query);		
 		stmt.execute();
-
-		this.query = null;
-		this.query = new StringBuilder();
+	
+		reset();
+	}
+	
+	private void reset( )
+	{
+		select = "";
+		from = "";
+		where = new StringBuilder();
+		values = new ArrayList<String>();
+		join = "";
 	}
 
 	/**
@@ -400,12 +461,32 @@ public class EasyDB
 	 */
 	public ResultSet executeQuery( ) throws SQLException
 	{		
-		PreparedStatement stmt = conn.prepareStatement(this.query.toString());		
+		
+		
+		String query = select + from + join + where;
+		
+		System.out.println("QUERY EXECUTED: " + query);
+		
+		PreparedStatement stmt = conn.prepareStatement(query.toString());		
 		ResultSet result =  stmt.executeQuery();
 
-		this.query = new StringBuilder();
+		reset();
 
 		return result;
+	}
+	
+	/**
+	 * Returns the string of the query being build
+	 * @return
+	 */
+	public String getQuery( )
+	{
+		StringBuilder query = new StringBuilder();
+		query.append(select);
+		query.append(from);
+		query.append(where);
+		
+		return query.toString();
 	}
 
 	/**
@@ -424,9 +505,10 @@ public class EasyDB
 		
 		System.out.println("SQL:" + sql);
 		
-		this.query = new StringBuilder(sql);
 		
-		ResultSet result =  this.executeQuery();	
+		PreparedStatement stmt = conn.prepareStatement(sql);		
+		ResultSet result =  stmt.executeQuery();
+		
 		return result;
 	}
 
@@ -473,14 +555,5 @@ public class EasyDB
 	public Connection getConnection( )
 	{
 		return conn;
-	}
-
-	/**
-	 * Returns the string of the query being build
-	 * @return
-	 */
-	public String getQuery( )
-	{
-		return query.toString();
 	}
 }
