@@ -39,9 +39,29 @@ public class EasyDB
 	//--------------------------------------------------------------
 
 	/**
-	 * The query being build
+	 * The select field
 	 */
-	private StringBuilder query;
+	private String select;
+	
+	/**
+	 * The from field
+	 */
+	private String from;
+	
+	/**
+	 * The where field
+	 */
+	private StringBuilder where;
+	
+	/**
+	 * The Join Field
+	 */
+	private String join;
+
+	/**
+	 * The Others field
+	 */
+	private String others;
 
 	/**
 	 * The values of the query
@@ -64,16 +84,21 @@ public class EasyDB
 
 	/**
 	 * Starting EasyDB using simple straight parameters
-	 * @param host 
-	 * @param database
-	 * @param username
-	 * @param password
+	 * @param host - database host
+	 * @param database - database schema
+	 * @param username - database username
+	 * @param password - databse password
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
 	public EasyDB(String host, String database,String username, String password) throws ClassNotFoundException, SQLException
-	{
-		this.query = new StringBuilder();	
+	{		
+		this.select = "";
+		this.from = "";
+		this.where = new StringBuilder();
+		this.join= "";
+		this.others = "";
+					
 		this.values = new ArrayList<String>();
 
 		this.database = database;
@@ -99,6 +124,33 @@ public class EasyDB
 		Class.forName( "com.mysql.jdbc.Driver" );
 		conn = DriverManager.getConnection(host, username, password );
 	}
+	
+	/**
+	 * Execute a String query
+	 * @throws SQLException
+	 */
+	private void execute(String query) throws SQLException
+	{
+		System.out.println("QUERY EXECUTED: " + query);
+		
+		PreparedStatement stmt = conn.prepareStatement(query);		
+		stmt.execute();
+	
+		reset();
+	}
+	
+	/**
+	 * Reset all values
+	 */
+	private void reset( )
+	{
+		select = "";
+		from = "";
+		where = new StringBuilder();
+		values = new ArrayList<String>();
+		join = "";
+		others = "";
+	}
 
 	//--------------------------------------------------------------
 	// Methods
@@ -110,9 +162,7 @@ public class EasyDB
 	 */
 	public void Select(String columns)
 	{
-		this.query.append("SELECT ");
-		this.query.append(columns);
-		this.query.append(" ");
+		this.select = "SELECT " + columns + " ";
 	}
 
 	/**
@@ -121,9 +171,7 @@ public class EasyDB
 	 */
 	public void From(String table)
 	{
-		this.query.append("FROM ");
-		this.query.append(this.database+ "." +table);
-		this.query.append(" ");
+		this.from = "FROM " + this.database+ "." +table + " ";
 	}
 
 	/**
@@ -132,27 +180,45 @@ public class EasyDB
 	 */
 	public void Where(String[] where)
 	{
-		this.query.append("WHERE ");
+		this.where.append("WHERE ");
 
 		for (int i = 0; i < where.length ; i++) 
 		{
-			query.append(where[i]);
+			this.where.append(where[i]);
 
 			if(where.length != (i + 1))
 			{
-				query.append(" AND ");
+				this.where.append(" AND ");
 			}
 		}
 	}
 
+
+	/**
+	 * SQL Where
+	 * @param where the string where parameteres
+	 */
+	public void Where(String where)
+	{
+		if(this.where.toString().equals(""))
+		{
+			this.where.append("WHERE ");
+			this.where.append(where);
+		}
+		else
+		{
+			this.where.append(" AND ");
+			this.where.append(where);
+		}
+	}
+	
 	/**
 	 * SQL ORDER
 	 * @param order
 	 */
 	public void Order(String order)
 	{
-		this.query.append("ORDER BY ");
-		this.query.append(order);
+		this.others += " ORDER BY "+ order;
 	}
 
 	/**
@@ -160,20 +226,22 @@ public class EasyDB
 	 * @param group
 	 */
 	public void GroupBy(String group)
-	{
-		this.query.append("GROUP BY ");
-		this.query.append(group);
+	{		
+		this.others += " GROUP BY "+ group;
 	}
 
 	/**
 	 * Comple Insert Statement
-	 * @param table
-	 * @param values 
+	 * @param table table to do the insert
+	 * @param values String values to get inserted in the table
+	 * @throws SQLException 
 	 */
-	public void InsertValues(String table, String[] values)
+	public void Insert(String table, String[] values) throws SQLException
 	{
-		this.query.append("INSERT INTO ");
-		this.query.append(this.database+ "." +table);
+		StringBuilder query = new StringBuilder();
+
+		query.append("INSERT INTO ");
+		query.append(this.database+ "." +table);
 
 		StringBuilder sql1 = new StringBuilder();
 		StringBuilder sql2 = new StringBuilder();
@@ -199,19 +267,24 @@ public class EasyDB
 		sql1.append(" ) ");
 		sql2.append(" ) ");
 
-		this.query.append(sql1);
-		this.query.append("VALUES ");
-		this.query.append(sql2);
+		query.append(sql1);
+		query.append("VALUES ");
+		query.append(sql2);
+
+		execute(query.toString());
 	}
 
 	/**
 	 * 
 	 * @param table
+	 * @throws SQLException 
 	 */
-	public void Insert(String table)
+	public void Insert(String table) throws SQLException
 	{
-		this.query.append("INSERT INTO ");
-		this.query.append(this.database+ "." +table);
+		StringBuilder query = new StringBuilder();
+
+		query.append("INSERT INTO ");
+		query.append(this.database+ "." +table);
 
 		StringBuilder sql1 = new StringBuilder();
 		StringBuilder sql2 = new StringBuilder();
@@ -237,21 +310,26 @@ public class EasyDB
 		sql1.append(" ) ");
 		sql2.append(" ) ");
 
-		this.query.append(sql1);
-		this.query.append("VALUES ");
-		this.query.append(sql2);
+		query.append(sql1);
+		query.append(" VALUES ");
+		query.append(sql2);
+		
+		execute(query.toString());
 	}
 
 	/**
-	 * 
-	 * @param table
-	 * @param values
-	 * @param where
+	 * Update table
+	 * @param table table to be updated
+	 * @param values values to be updated
+	 * @param where rows to be updated
+	 * @throws SQLException 
 	 */
-	public void UpdateValues(String table, String[] values, String[] where)
+	public void Update(String table, String[] values) throws SQLException
 	{
-		this.query.append("UPDATE ");
-		this.query.append(this.database + "." + table);
+		StringBuilder query = new StringBuilder();
+
+		query.append("UPDATE ");
+		query.append(this.database + "." + table);
 
 		StringBuilder sql1 = new StringBuilder();
 		sql1.append(" SET ");
@@ -265,19 +343,24 @@ public class EasyDB
 		}
 
 		sql1.append(" ");
-		this.query.append(sql1);
-		this.Where(where);
+		query.append(sql1);
+
+		query.append(where.toString());		
+		execute(query.toString());
 	}
 
 	/**
 	 * 
 	 * @param table
 	 * @param where
+	 * @throws SQLException 
 	 */
-	public void Update(String table, String[] where)
+	public void Update(String table) throws SQLException
 	{
-		this.query.append("UPDATE ");
-		this.query.append(table);
+		StringBuilder query = new StringBuilder();
+
+		query.append("UPDATE ");
+		query.append(table);
 
 		StringBuilder sql1 = new StringBuilder();
 		StringBuilder sql2 = new StringBuilder();
@@ -303,48 +386,55 @@ public class EasyDB
 		sql1.append(") ");
 		sql2.append(") ");
 
-		this.query.append(sql1);
-		this.query.append("SET ");
-		this.query.append(sql2);
+		query.append(sql1);
+		query.append("SET ");
+		query.append(sql2);
+
+		execute(query.toString());
 	}
 
 	/**
-	 * 
-	 * @param table
+	 * Delete an specific table
+	 * @param table table want to delete
+	 * @throws SQLException 
 	 */
-	public void DeleteTable(String table)
+	public void DeleteTable(String table) throws SQLException
 	{
-		this.query.append("DROP TABLE ");
-		this.query.append(table);
-	}
-
-	/**
-	 * 
-	 * @param table
-	 * @param values
-	 */
-	public void DeleteRowValues(String table, String[] values)
-	{
-		this.query.append("DELETE FROM ");
-		this.query.append(table);
-		this.query.append(" ");
+		StringBuilder query = new StringBuilder();
 		
-		this.Where(values);
+		query.append("DROP TABLE ");
+		query.append(table);
+		
+		execute(query.toString());
 	}
 
 	/**
-	 * 
+	 * Delete certain rows of a table
+	 * @param table table in wich row will be deleted
+	 * @throws SQLException 
+	 */
+	public void DeleteRow(String table) throws SQLException
+	{
+		StringBuilder query = new StringBuilder();
+		
+		query.append("DELETE FROM ");
+		query.append(table);
+		query.append(" ");
+		query.append(" ");
+		
+		query.append(this.where);
+		execute(query.toString());
+	}
+
+	/**
+	 * Inner Join of tables
 	 * @param table
 	 * @param on
 	 */
 	public void InnerJoin(String table, String on)
 	{
 		//INNER JOIN	
-		this.query.append("INNER JOIN ");
-		this.query.append(this.database + "." +table);
-
-		this.query.append(" ON ");
-		this.query.append(on);
+		join = "INNER JOIN " + this.database + "." + table + " ON " + on;
 	}
 
 	/**
@@ -379,20 +469,7 @@ public class EasyDB
 		String add = column + "=" + value;
 		values.add(add);
 	}
-
-	/**
-	 * 
-	 * @throws SQLException
-	 */
-	public void execute( ) throws SQLException
-	{
-		PreparedStatement stmt = conn.prepareStatement(query.toString());		
-		stmt.execute();
-
-		this.query = null;
-		this.query = new StringBuilder();
-	}
-
+	
 	/**
 	 * 
 	 * @return
@@ -400,23 +477,42 @@ public class EasyDB
 	 */
 	public ResultSet executeQuery( ) throws SQLException
 	{		
-		PreparedStatement stmt = conn.prepareStatement(this.query.toString());		
+		String query = select + from + join + where + others;
+		
+		System.out.println("QUERY EXECUTED: " + query);
+		
+		PreparedStatement stmt = conn.prepareStatement(query.toString());		
 		ResultSet result =  stmt.executeQuery();
 
-		this.query = new StringBuilder();
+		reset();
 
 		return result;
 	}
-
+	
 	/**
-	 * 
-	 * @param sql
-	 * @param values
+	 * Returns the string of the query being build
+	 * @return
+	 */
+	public String getQuery( )
+	{
+		StringBuilder query = new StringBuilder();
+		query.append(select);
+		query.append(from);
+		query.append(where);
+		
+		return query.toString();
+	}
+
+	
+	/**
+	 * Execute an specific SQL
+	 * @param sql sql want to execute with "?" in the values
+	 * @param values 
 	 * @return
 	 * @throws SQLException
 	 */
 	public ResultSet executeSQL(String sql, String[] values) throws SQLException
-	{
+	{		
 		for(String value: values)
 		{
 			sql = sql.replaceFirst("\\?", value);		
@@ -424,9 +520,9 @@ public class EasyDB
 		
 		System.out.println("SQL:" + sql);
 		
-		this.query = new StringBuilder(sql);
+		PreparedStatement stmt = conn.prepareStatement(sql);		
+		ResultSet result =  stmt.executeQuery();
 		
-		ResultSet result =  this.executeQuery();	
 		return result;
 	}
 
@@ -475,12 +571,4 @@ public class EasyDB
 		return conn;
 	}
 
-	/**
-	 * Returns the string of the query being build
-	 * @return
-	 */
-	public String getQuery( )
-	{
-		return query.toString();
-	}
 }

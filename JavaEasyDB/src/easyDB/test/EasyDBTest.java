@@ -41,7 +41,6 @@ import easyDB.mundo.EasyDB;
  */
 public class EasyDBTest 
 {
-
 	//----------------------------------------------------------------------
 	// Constants
 	//----------------------------------------------------------------------
@@ -211,21 +210,16 @@ public class EasyDBTest
 	 * 
 	 */
 	@Test
-	public void testInsertValues( )
+	public void testInsert( )
 	{
 		try
 		{		
 			String[] values = {"id=2","name=\"gustavo\"", "age=22"};		
-			easy.InsertValues("Users", values);		
+			easy.Insert("Users", values);		
 
-			System.out.println("QUERY EXECUTED: " + easy.getQuery());
-
-			easy.execute();
-
-			String[] where = {"name=\"gustavo\""};	
 			easy.Select("name");
 			easy.From("Users");
-			easy.Where(where);
+			easy.Where("name=\"gustavo\"");
 
 			ResultSet result = easy.executeQuery();
 
@@ -248,7 +242,7 @@ public class EasyDBTest
 	 * 
 	 */
 	@Test
-	public void testIntert( )
+	public void testIntertValues( )
 	{
 		try
 		{		
@@ -257,14 +251,9 @@ public class EasyDBTest
 			easy.addInt("age", 22);
 			easy.Insert("Users");
 
-			System.out.println("QUERY EXECUTED: " + easy.getQuery());
-
-			easy.execute();
-
-			String[] where = {"name=\"cami\""};	
 			easy.Select("name");
 			easy.From("Users");
-			easy.Where(where);
+			easy.Where("name=\"cami\"");
 
 			ResultSet result = easy.executeQuery();
 
@@ -292,17 +281,13 @@ public class EasyDBTest
 		try
 		{		
 			String[] values = {"age=23"};	
-			String[] where  = {"name=\"Gus\""};
-			easy.UpdateValues("Users", values, where);	
 
-			System.out.println("QUERY EXECUTED: " + easy.getQuery());
+			easy.Where("name=\"Gus\"");
+			easy.Update("Users", values);	
 
-			easy.execute();
-
-			String[] where2 = {"name=\"Gus\""};	
 			easy.Select("age");
 			easy.From("Users");
-			easy.Where(where2);
+			easy.Where("name=\"Gus\"");
 
 			ResultSet result = easy.executeQuery();
 
@@ -356,6 +341,7 @@ public class EasyDBTest
 		}	
 	}
 	
+
 	/**
 	 * 
 	 */
@@ -392,15 +378,13 @@ public class EasyDBTest
 	{
 		try
 		{
-			String[ ] where = {"name=\"Gus\""};
+
+			easy.Where("name=\"Gus\"");
+			easy.DeleteRow("Users");
 			
-			easy.DeleteRowValues("Users", where);
-			easy.execute();  
-		
-			String[] where2 = {"name=\"Gus\""};	
 			easy.Select("age");
 			easy.From("Users");
-			easy.Where(where2);
+			easy.Where("name=\"Gus\"");
 			
 			ResultSet result = easy.executeQuery();
 			
@@ -413,7 +397,6 @@ public class EasyDBTest
 		{
 			fail(e.getMessage());
 		}
-
 	}
 
 	/**
@@ -425,9 +408,6 @@ public class EasyDBTest
 	{	
 		easy.DeleteTable("Users");
 
-		System.out.println("QUERY EXECUTED: " + easy.getQuery());
-
-		easy.execute();
 
 		easy.Select("age");
 		easy.From("Users");
