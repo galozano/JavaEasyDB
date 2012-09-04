@@ -38,13 +38,30 @@ public class EasyDB
 	// Attributes
 	//--------------------------------------------------------------
 	
+	/**
+	 * The select field
+	 */
 	private String select;
 	
+	/**
+	 * The from field
+	 */
 	private String from;
 	
+	/**
+	 * The where field
+	 */
 	private StringBuilder where;
 	
+	/**
+	 * The Join Field
+	 */
 	private String join;
+	
+	/**
+	 * The Others field
+	 */
+	private String others;
 
 	/**
 	 * The values of the query
@@ -80,6 +97,7 @@ public class EasyDB
 		this.from = "";
 		this.where = new StringBuilder();
 		this.join= "";
+		this.others = "";
 					
 		this.values = new ArrayList<String>();
 
@@ -88,7 +106,7 @@ public class EasyDB
 
 		connect(host, username, password);
 	}
-
+	
 	//--------------------------------------------------------------
 	// Private Methods
 	//--------------------------------------------------------------
@@ -105,6 +123,33 @@ public class EasyDB
 	{
 		Class.forName( "com.mysql.jdbc.Driver" );
 		conn = DriverManager.getConnection(host, username, password );
+	}
+	
+	/**
+	 * Execute a String query
+	 * @throws SQLException
+	 */
+	private void execute(String query) throws SQLException
+	{
+		System.out.println("QUERY EXECUTED: " + query);
+		
+		PreparedStatement stmt = conn.prepareStatement(query);		
+		stmt.execute();
+	
+		reset();
+	}
+	
+	/**
+	 * Reset all values
+	 */
+	private void reset( )
+	{
+		select = "";
+		from = "";
+		where = new StringBuilder();
+		values = new ArrayList<String>();
+		join = "";
+		others = "";
 	}
 
 	//--------------------------------------------------------------
@@ -149,8 +194,8 @@ public class EasyDB
 	}
 	
 	/**
-	 * 
-	 * @param where
+	 * SQL Where
+	 * @param where the string where parameteres
 	 */
 	public void Where(String where)
 	{
@@ -166,17 +211,13 @@ public class EasyDB
 		}
 	}
 	
-	
-	
-
 	/**
 	 * SQL ORDER
 	 * @param order
 	 */
 	public void Order(String order)
 	{
-//		this.query.append("ORDER BY ");
-//		this.query.append(order);
+		this.others += " ORDER BY "+ order;
 	}
 
 	/**
@@ -184,15 +225,14 @@ public class EasyDB
 	 * @param group
 	 */
 	public void GroupBy(String group)
-	{
-//		this.query.append("GROUP BY ");
-//		this.query.append(group);
+	{		
+		this.others += " GROUP BY "+ group;
 	}
 
 	/**
 	 * Comple Insert Statement
-	 * @param table
-	 * @param values 
+	 * @param table table to do the insert
+	 * @param values String values to get inserted in the table
 	 * @throws SQLException 
 	 */
 	public void Insert(String table, String[] values) throws SQLException
@@ -278,10 +318,10 @@ public class EasyDB
 	}
 
 	/**
-	 * 
-	 * @param table
-	 * @param values
-	 * @param where
+	 * Update table
+	 * @param table table to be updated
+	 * @param values values to be updated
+	 * @param where rows to be updated
 	 * @throws SQLException 
 	 */
 	public void Update(String table, String[] values) throws SQLException
@@ -355,8 +395,8 @@ public class EasyDB
 	}
 
 	/**
-	 * 
-	 * @param table
+	 * Delete an specific table
+	 * @param table table want to delete
 	 * @throws SQLException 
 	 */
 	public void DeleteTable(String table) throws SQLException
@@ -370,9 +410,8 @@ public class EasyDB
 	}
 
 	/**
-	 * 
-	 * @param table
-	 * @param values
+	 * Delete certain rows of a table
+	 * @param table table in wich row will be deleted
 	 * @throws SQLException 
 	 */
 	public void DeleteRow(String table) throws SQLException
@@ -388,7 +427,7 @@ public class EasyDB
 	}
 
 	/**
-	 * 
+	 * Inner Join of tables
 	 * @param table
 	 * @param on
 	 */
@@ -430,30 +469,7 @@ public class EasyDB
 		String add = column + "=" + value;
 		values.add(add);
 	}
-
-	/**
-	 * 
-	 * @throws SQLException
-	 */
-	public void execute(String query) throws SQLException
-	{
-		System.out.println("QUERY EXECUTED: " + query);
-		
-		PreparedStatement stmt = conn.prepareStatement(query);		
-		stmt.execute();
 	
-		reset();
-	}
-	
-	private void reset( )
-	{
-		select = "";
-		from = "";
-		where = new StringBuilder();
-		values = new ArrayList<String>();
-		join = "";
-	}
-
 	/**
 	 * 
 	 * @return
@@ -461,9 +477,7 @@ public class EasyDB
 	 */
 	public ResultSet executeQuery( ) throws SQLException
 	{		
-		
-		
-		String query = select + from + join + where;
+		String query = select + from + join + where + others;
 		
 		System.out.println("QUERY EXECUTED: " + query);
 		
@@ -490,9 +504,9 @@ public class EasyDB
 	}
 
 	/**
-	 * 
-	 * @param sql
-	 * @param values
+	 * Execute an specific SQL
+	 * @param sql sql want to execute with "?" in the values
+	 * @param values 
 	 * @return
 	 * @throws SQLException
 	 */
@@ -504,7 +518,6 @@ public class EasyDB
 		}
 		
 		System.out.println("SQL:" + sql);
-		
 		
 		PreparedStatement stmt = conn.prepareStatement(sql);		
 		ResultSet result =  stmt.executeQuery();
