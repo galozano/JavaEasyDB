@@ -58,7 +58,7 @@ public class EasyDBTest
 	/**
 	 * 
 	 */
-	public static final String PASSWORD = "qazxsw23edc";
+	public static final String PASSWORD = "";
 
 	//----------------------------------------------------------------------
 	// Aributtes
